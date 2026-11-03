@@ -241,7 +241,7 @@ $("downloadBtn").onclick=()=>{
  const blob=new Blob([wallpaperSvg()],{type:"image/svg+xml"});
  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`timetable-week${selectedWeek}-${dayNames[selectedDay].toLowerCase()}.svg`;a.click();URL.revokeObjectURL(url);
 };
-setDate("2026-11-03");
+setDate(dateKey(new Date()));
 $("dateInput").value=selectedDate;
 </script>
 </body>
