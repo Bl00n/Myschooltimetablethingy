@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School Timetable</title>
+<style>
+:root {
+  --site-primary: #263c59;
+  --site-on-primary: #ffffff;
+  --site-secondary: #dce7f2;
+  --site-on-secondary: #17283d;
+  --site-background: #eef2f7;
+  --site-on-background: #172235;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  color-scheme: light dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--site-font-body); background: var(--site-background); color: var(--site-on-background); }
+#app {
+  min-height: 100vh;
+  width: 100%;
+  border-radius: 0;
+  background-color: light-dark(var(--site-background), #111923);
+  color: light-dark(var(--site-on-background), #edf3fb);
+  padding: calc(26px * var(--site-spacing-scale));
+}
+.shell { max-width: 1100px; margin: 0 auto; }
+header { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; }
+.eyebrow { text-transform:uppercase; letter-spacing:.16em; font-size:11px; font-weight:800; opacity:.65; }
+h1 { font-family:var(--site-font-heading); font-size:calc(32px * var(--site-heading-scale)); margin:5px 0 0; letter-spacing:-.04em; }
+.sub { opacity:.7; margin:7px 0 0; font-size:14px; }
+.pill { background:var(--site-secondary); color:var(--site-on-secondary); border-radius:999px; padding:9px 13px; font-size:12px; font-weight:800; white-space:nowrap; }
+.layout { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr); gap:22px; align-items:start; }
+.panel { background:light-dark(#fff,#1a2634); border:1px solid light-dark(#dce3ec,#2d3b4b); border-radius:calc(22px * var(--site-radius-scale)); padding:calc(20px * var(--site-spacing-scale)); box-shadow:0 10px 30px rgba(20,35,55,.06); }
+.panel h2 { font-size:calc(18px * var(--site-heading-scale)); margin:0 0 16px; letter-spacing:-.02em; }
+.controls { display:flex; flex-wrap:wrap; gap:9px; margin-bottom:16px; }
+button, select, input { font:inherit; }
+button, select, input[type=date] { border:1px solid light-dark(#ccd6e2,#405166); border-radius:12px; padding:10px 13px; background:light-dark(#f7f9fc,#202e3e); color:inherit; }
+button { cursor:pointer; font-weight:750; }
+button.active, .primary { background:var(--site-primary); color:var(--site-on-primary); border-color:var(--site-primary); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline:3px solid #77a9e8; outline-offset:2px; }
+.meta { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px 0 15px; }
+.meta strong { font-size:20px; }
+.meta span { opacity:.65; font-size:12px; }
+.lesson-list { display:grid; gap:8px; }
+.lesson { display:grid; grid-template-columns:94px 1fr; align-items:center; gap:12px; padding:12px 13px; border-radius:14px; background:light-dark(#f3f6fa,#223143); }
+.time { font-size:11px; font-weight:800; opacity:.62; font-variant-numeric:tabular-nums; }
+.subject { font-weight:800; font-size:15px; }
+.break { background:light-dark(#e8edf4,#2a394b); }
+.break .subject { font-size:13px; letter-spacing:.04em; text-transform:uppercase; }
+.editor { margin-top:18px; }
+.editor-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+.editor-grid label { display:grid; gap:5px; font-size:11px; font-weight:800; opacity:.8; }
+.editor-grid input { min-width:0; width:100%; padding:9px 7px; font-size:12px; }
+.hint { font-size:12px; line-height:1.5; opacity:.65; margin:12px 0 0; }
+.wallpaper-wrap { display:flex; justify-content:center; }
+.wallpaper { width:min(100%,330px); aspect-ratio:9/19.5; border-radius:34px; padding:27px 19px 22px; color:#f5f7fb; background:radial-gradient(ellipse at 80% 8%,rgba(91,132,180,.34),transparent 35%),linear-gradient(155deg,#14253a,#0b1421 70%); box-shadow:0 22px 55px rgba(5,15,28,.28); display:flex; flex-direction:column; overflow:hidden; }
+.w-date { text-align:center; font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.75; margin-top:13px; }
+.w-day { text-align:center; font-size:30px; font-weight:850; letter-spacing:-.05em; margin:6px 0 3px; }
+.w-week { text-align:center; font-size:11px; opacity:.65; margin-bottom:23px; }
+.w-lessons { display:grid; gap:7px; }
+.w-row { display:grid; grid-template-columns:76px 1fr; gap:8px; align-items:center; background:rgba(255,255,255,.075); border:1px solid rgba(255,255,255,.09); border-radius:12px; padding:10px 9px; }
+.w-row .time { color:#c7d3e2; font-size:9px; }
+.w-row .subject { font-size:12px; }
+.w-row.break { background:rgba(154,181,211,.14); }
+.w-row.break .subject { font-size:10px; }
+.w-footer { margin-top:auto; text-align:center; font-size:10px; opacity:.48; letter-spacing:.12em; padding-top:15px; }
+.actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:15px; }
+.actions button { flex:1; }
+.notice { font-size:12px; line-height:1.5; opacity:.7; margin-top:12px; }
+@media(max-width:760px) {
+  #app { padding:18px 13px; }
+  header { align-items:flex-start; }
+  .layout { grid-template-columns:1fr; }
+  .wallpaper { width:min(78%,300px); }
+  .editor-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+</style>
+</head>
+<body>
+<div id="app">
+ <div class="shell">
+  <header>
+   <div><div class="eyebrow">Personal timetable</div><h1>Your school day.</h1><p class="sub">Two-week rotation, one daily lockscreen.</p></div>
+   <div class="pill">WEEK 1 / WEEK 2</div>
+  </header>
+  <div class="layout">
+   <section class="panel">
+    <h2>Timetable editor</h2>
+    <div class="controls">
+     <button id="autoBtn" class="active">Automatic date</button>
+     <button id="w1Btn">Week 1</button>
+     <button id="w2Btn">Week 2</button>
+     <select id="daySelect" aria-label="Select day">
+      <option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option>
+     </select>
+     <input id="dateInput" type="date" value="2026-11-03" aria-label="Preview date">
+    </div>
+    <div class="meta"><strong id="dayHeading">Tuesday</strong><span id="weekLabel">Week 1 · 3 November 2026</span></div>
+    <div class="lesson-list" id="lessonList"></div>
+    <div class="editor">
+     <h2>Edit selected day</h2>
+     <div class="editor-grid" id="editorGrid"></div>
+     <div class="actions"><button class="primary" id="saveBtn">Save changes</button><button id="resetBtn">Reset timetable</button></div>
+     <p class="hint">Edits are saved in this browser on this device. The starter timetable is included, so you don't have to enter all 50 lessons again. Storage is local to this browser, not synced between devices.</p>
+    </div>
+   </section>
+   <section class="panel">
+    <h2>Lockscreen preview</h2>
+    <div class="wallpaper-wrap">
+     <div class="wallpaper" id="wallpaper">
+      <div class="w-date" id="wDate">TUESDAY · 3 NOVEMBER</div>
+      <div class="w-day" id="wDay">Tuesday</div>
+      <div class="w-week" id="wWeek">WEEK 1</div>
+      <div class="w-lessons" id="wLessons"></div>
+      <div class="w-footer">ONE DAY AT A TIME</div>
+     </div>
+    </div>
+    <div class="actions"><button class="primary" id="downloadBtn">Download wallpaper</button></div>
+    <p class="notice">This is a visual preview. The live GitHub Pages version can provide a stable image URL for an iPhone Shortcut to download. The preview here does not publish or host that URL.</p>
+   </section>
+  </div>
+ </div>
+</div>
+<script>
+const defaults = {
+  "1": {
+    "1":["English","Geography","English","PE","Maths"],
+    "2":["English","Music","Welsh","Maths","Science"],
+    "3":["Drama","PE","Art","Maths","Science"],
+    "4":["PSE","PD","History","English","RE"],
+    "5":["Science","IT","PD","PE","English"]
+  },
+  "2": {
+    "1":["English","Art","Geography","Food Tech","Maths"],
+    "2":["Music","English","Maths","PE","Science"],
+    "3":["Maths","Music","Science","Welsh","RE"],
+    "4":["Drama","MFL","RE","Science","Welsh"],
+    "5":["Food Tech","MFL","History","IT","Maths"]
+  }
+};
+const times = [
+ ["09:05","10:05"],["10:05","11:05"],["11:25","12:25"],["12:25","13:25"],["14:00","15:00"]
+];
+const dayNames = ["","Monday","Tuesday","Wednesday","Thursday","Friday"];
+let schedules = JSON.parse(localStorage.getItem("schoolTimetableData") || "null") || structuredClone(defaults);
+let selectedWeek = 1, selectedDay = 2, automatic = true, selectedDate = "2026-11-03";
+const $ = id => document.getElementById(id);
+function parseLocalDate(s) { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function dateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function schoolWeek(d) {
+ const anchors = [
+  ["2026-11-02",1],["2026-11-09",2],["2026-11-16",1],["2026-11-23",2],
+  ["2026-11-30",1],["2026-12-07",2],["2026-12-14",1],
+  ["2027-01-05",2],["2027-01-11",1],["2027-01-18",2],["2027-01-25",1],
+  ["2027-02-01",2],["2027-02-15",1],["2027-02-22",2],["2027-03-01",1],
+  ["2027-03-08",2],["2027-03-15",1],["2027-04-05",2],["2027-04-12",1],
+  ["2027-04-19",2],["2027-04-26",1],["2027-05-03",2],["2027-05-10",1],
+  ["2027-05-17",2],["2027-05-24",1],["2027-06-07",2],["2027-06-14",1],["2027-06-21",2],["2027-06-28",1],["2027-07-05",2],["2027-07-12",1]
+ ];
+ const key=dateKey(d);
+ let result=1;
+ for (const [start,week] of anchors) if (key>=start) result=week;
+ return result;
+}
+function currentSchedule() { return schedules[String(selectedWeek)][String(selectedDay)]; }
+function addRow(parent, start, end, name, isBreak=false, compact=false) {
+ const row=document.createElement("div"); row.className="lesson"+(isBreak?" break":"")+(compact?" w-row":"");
+ const time=document.createElement("div"); time.className="time"; time.textContent=`${start}–${end}`;
+ const subject=document.createElement("div"); subject.className="subject"; subject.textContent=name;
+ row.append(time,subject); parent.append(row);
+}
+function render() {
+ $("dayHeading").textContent=dayNames[selectedDay];
+ $("weekLabel").textContent=`Week ${selectedWeek} · ${parseLocalDate(selectedDate).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}`;
+ $("wDate").textContent=parseLocalDate(selectedDate).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}).toUpperCase();
+ $("wDay").textContent=dayNames[selectedDay];
+ $("wWeek").textContent=`WEEK ${selectedWeek}`;
+ $("lessonList").innerHTML="";
+ const entries=currentSchedule();
+ addRow($("lessonList"),"09:05","10:05",entries[0]);
+ addRow($("lessonList"),"10:05","11:05",entries[1]);
+ addRow($("lessonList"),"11:05","11:25","Break",true);
+ addRow($("lessonList"),"11:25","12:25",entries[2]);
+ addRow($("lessonList"),"12:25","13:25",entries[3]);
+ addRow($("lessonList"),"13:25","14:00","Lunch",true);
+ addRow($("lessonList"),"14:00","15:00",entries[4]);
+ $("wLessons").innerHTML="";
+ addRow($("wLessons"),"09:05–10:05","",entries[0],false,true);
+ addRow($("wLessons"),"10:05–11:05","",entries[1],false,true);
+ addRow($("wLessons"),"11:05–11:25","","BREAK",true,true);
+ addRow($("wLessons"),"11:25–12:25","",entries[2],false,true);
+ addRow($("wLessons"),"12:25–13:25","",entries[3],false,true);
+ addRow($("wLessons"),"13:25–14:00","","LUNCH",true,true);
+ addRow($("wLessons"),"14:00–15:00","",entries[4],false,true);
+ $("wLessons").querySelectorAll(".w-row .time").forEach(el=>el.textContent=el.textContent.replace("–","–"));
+ $("editorGrid").innerHTML="";
+ entries.forEach((subject,i)=>{
+  const label=document.createElement("label"); label.textContent=`Period ${i+1}`;
+  const input=document.createElement("input"); input.value=subject; input.maxLength=28; input.dataset.period=i; input.setAttribute("aria-label",`Period ${i+1} subject`);
+  label.append(input); $("editorGrid").append(label);
+ });
+ $("w1Btn").classList.toggle("active",!automatic&&selectedWeek===1);
+ $("w2Btn").classList.toggle("active",!automatic&&selectedWeek===2);
+ $("autoBtn").classList.toggle("active",automatic);
+}
+function setDate(value) {
+ selectedDate=value;
+ const d=parseLocalDate(value);
+ selectedDay=Math.min(5,Math.max(1,((d.getDay()+6)%7)+1));
+ selectedWeek=schoolWeek(d);
+ $("daySelect").value=String(selectedDay);
+ automatic=true; render();
+}
+$("autoBtn").onclick=()=>setDate(dateKey(new Date()));
+$("w1Btn").onclick=()=>{automatic=false;selectedWeek=1;render();};
+$("w2Btn").onclick=()=>{automatic=false;selectedWeek=2;render();};
+$("daySelect").onchange=e=>{selectedDay=Number(e.target.value);automatic=false;render();};
+$("dateInput").onchange=e=>{if(e.target.value)setDate(e.target.value);};
+$("saveBtn").onclick=()=>{
+ $("editorGrid").querySelectorAll("input").forEach(input=>{schedules[String(selectedWeek)][String(selectedDay)][Number(input.dataset.period)]=input.value.trim()||"Free";});
+ localStorage.setItem("schoolTimetableData",JSON.stringify(schedules)); render();
+};
+$("resetBtn").onclick=()=>{schedules=structuredClone(defaults);localStorage.removeItem("schoolTimetableData");render();};
+function wallpaperSvg() {
+ const entries=currentSchedule(), date=parseLocalDate(selectedDate);
+ const rows=[["09:05–10:05",entries[0]],["10:05–11:05",entries[1]],["11:05–11:25","BREAK"],["11:25–12:25",entries[2]],["12:25–13:25",entries[3]],["13:25–14:00","LUNCH"],["14:00–15:00",entries[4]]];
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[c]));
+ let y=440;
+ const rowSvg=rows.map(([time,name],i)=>{const isPause=i===2||i===5;const h=isPause?94:112;const out=`<rect x="72" y="${y}" width="936" height="${h-8}" rx="26" fill="${isPause?"#9ab5d3":"#ffffff"}" fill-opacity="${isPause?".15":".075"}" stroke="#ffffff" stroke-opacity=".12"/><text x="104" y="${y+40}" fill="#c7d3e2" font-size="24" font-weight="700">${esc(time)}</text><text x="104" y="${y+76}" fill="#f5f7fb" font-size="${isPause?29:36}" font-weight="800">${esc(name)}</text>`;y+=h;return out;}).join("");
+ const dateText=esc(date.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}).toUpperCase());
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="2340" viewBox="0 0 1080 2340"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#172b43"/><stop offset="1" stop-color="#091321"/></linearGradient><radialGradient id="glow"><stop stop-color="#5b84b4" stop-opacity=".45"/><stop offset="1" stop-color="#5b84b4" stop-opacity="0"/></radialGradient></defs><rect width="1080" height="2340" fill="url(#bg)"/><circle cx="930" cy="160" r="500" fill="url(#glow)"/><text x="540" y="190" text-anchor="middle" fill="#c7d3e2" font-size="30" letter-spacing="5">${dateText}</text><text x="540" y="285" text-anchor="middle" fill="#ffffff" font-size="88" font-weight="800">${dayNames[selectedDay]}</text><text x="540" y="340" text-anchor="middle" fill="#c7d3e2" font-size="30" letter-spacing="4">WEEK ${selectedWeek}</text>${rowSvg}<text x="540" y="2250" text-anchor="middle" fill="#c7d3e2" opacity=".55" font-size="24" letter-spacing="5">ONE DAY AT A TIME</text></svg>`;
+}
+$("downloadBtn").onclick=()=>{
+ const blob=new Blob([wallpaperSvg()],{type:"image/svg+xml"});
+ const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`timetable-week${selectedWeek}-${dayNames[selectedDay].toLowerCase()}.svg`;a.click();URL.revokeObjectURL(url);
+};
+setDate("2026-11-03");
+$("dateInput").value=selectedDate;
+</script>
+</body>
+</html>
